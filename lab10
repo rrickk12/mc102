@@ -17,9 +17,9 @@ typedef struct {
 int main()
 {
   /*vetor de eventos*/
-  TpSom *vetorEventos;
+  TpSom *vetorEventos,*vetorAuxiliar,aux;
   /*vetor de saidaVec*/
-  TpEvento *saidaVec,aux;
+  TpEvento *saidaVec;
   /*vetor de entrada*/
   int entrada[5];
   /*variaveis auxiliares*/
@@ -82,9 +82,9 @@ int main()
       sizeEventos++;
     }
   }
-  /*ao terminar a leitura temos o tamanho do vetorEventos sendo assim conseguimos facilmente ordenar por instante*/
+  /*ao terminar a leitura temos o tamanho do vetorEventos sendo assim conseguimos facilmente ordenar por instanteInicial*/
   saidaVec = malloc(sizeof(TpEvento)*sizeEventos*2);
-  /*vamos assumir que o tempo da musica nao eh infinito, podemos procurar todos os instantes iniciais e finais  do vetorEventos */
+  vetorAuxiliar = malloc(sizeof(TpSom)*sizeEventos*2);
   i=0;
   instante=0;
   while(i<sizeEventos*2)
@@ -92,39 +92,37 @@ int main()
     for(j=0;j<sizeEventos;j++)
     {
       /*procura o final da nota  igual ao da interacao atual*/
-      if ((vetorEventos[j].instanteInicial==instante||vetorEventos[j].duracao+vetorEventos[j].instanteInicial==instante)&& vetorEventos[j].duracao!=-1)
+      if ((vetorEventos[j].instanteInicial==instante||vetorEventos[j].duracao+vetorEventos[j].instanteInicial==instante)&& vetorEventos[j].duracao!=0)
       {
         if(vetorEventos[j].intensidade != 0)
         {
-          saidaVec[i].instrumento = vetorEventos[j].instrumento;
-          saidaVec[i].nota = vetorEventos[j].nota;
-          saidaVec[i].intensidade = vetorEventos[j].intensidade;
-          saidaVec[i].instante = vetorEventos[j].instanteInicial;
+          vetorAuxiliar[i].instrumento = vetorEventos[j].instrumento;
+          vetorAuxiliar[i].nota = vetorEventos[j].nota;
+          vetorAuxiliar[i].intensidade = vetorEventos[j].intensidade;
+          vetorAuxiliar[i].instanteInicial = vetorEventos[j].instanteInicial;
           /*marca a intensidade como 0*/
           vetorEventos[j].intensidade=0;
         }
         else
         {
-
-          saidaVec[i].instrumento = vetorEventos[j].instrumento;
-          saidaVec[i].nota = vetorEventos[j].nota;
-          saidaVec[i].intensidade = vetorEventos[j].intensidade;
-          saidaVec[i].instante= vetorEventos[j].duracao+vetorEventos[j].instanteInicial;
+          vetorAuxiliar[i].instrumento = vetorEventos[j].instrumento;
+          vetorAuxiliar[i].nota = vetorEventos[j].nota;
+          vetorAuxiliar[i].intensidade = vetorEventos[j].intensidade;
+          vetorAuxiliar[i].instanteInicial= vetorEventos[j].duracao+vetorEventos[j].instanteInicial;
           /*marca a duracao como -1*/
-          vetorEventos[j].duracao=-1;
+          vetorEventos[j].duracao=0;
+          vetorAuxiliar[i].duracao=0;
         }
-        /*soma 1 no indice do vetor de saidaVec*/
+        /*soma 1 no indice do vetor de vetorAuxiliar*/
         i++;
         j=0;
       }
-      /*procura o instanteInicial igual ao da interacao atual*/
-
     }
     /*procura o proximo instante*/
     instante++;
   }
 
-  /*temos agora o vetor de saidaVec com os eventos ordenados, podemos liberar a memoria do vetorEventos*/
+  /*temos agora o vetorAuxiliar  com os eventos ordenados, podemos liberar a memoria do vetorEventos*/
   free(vetorEventos);
 
   /*realiza a ordenacao dos eventos simultaneos
@@ -134,45 +132,117 @@ int main()
   {
     for(j=i+1;j<sizeEventos*2;j++)
     {
-      /*um instante que possui 2 eventos*/
-      if(saidaVec[i].instante == saidaVec[j].instante)
+      if(vetorAuxiliar[i].instanteInicial > vetorAuxiliar[j].instanteInicial)
       {
-          /*se neste instante a posicao menor possuir um instrumento maior, troca*/
-          if(saidaVec[i].instrumento > saidaVec[j].instrumento)
+        aux.instrumento = vetorAuxiliar[i].instrumento;
+        aux.nota = vetorAuxiliar[i].nota;
+        aux.intensidade = vetorAuxiliar[i].intensidade;
+        aux.instanteInicial = vetorAuxiliar[i].instanteInicial;
+        aux.duracao = vetorAuxiliar[i].duracao;
+        vetorAuxiliar[i].instrumento = vetorAuxiliar[j].instrumento;
+        vetorAuxiliar[i].nota = vetorAuxiliar[j].nota;
+        vetorAuxiliar[i].intensidade = vetorAuxiliar[j].intensidade;
+        vetorAuxiliar[i].instanteInicial = vetorAuxiliar[j].instanteInicial;
+        vetorAuxiliar[i].duracao = vetorAuxiliar[j].duracao;
+        vetorAuxiliar[j].instrumento = aux.instrumento;
+        vetorAuxiliar[j].nota = aux.nota;
+        vetorAuxiliar[j].intensidade = aux.intensidade;
+        vetorAuxiliar[j].instanteInicial = aux.instanteInicial;
+        vetorAuxiliar[j].duracao = aux.duracao;
+        i=0;
+        j=0;
+      }
+    }
+  }
+  for(i=0;i<sizeEventos*2;i++)
+  {
+    for(j=i+1;j<sizeEventos*2;j++)
+    {
+
+      /*um instanteInicial que possui 2 eventos*/
+      if(vetorAuxiliar[i].instanteInicial == vetorAuxiliar[j].instanteInicial)
+      {
+          /*se neste instanteInicial a posicao menor possuir um instrumento maior, troca*/
+          if(vetorAuxiliar[i].instrumento > vetorAuxiliar[j].instrumento)
           {
-            aux.instrumento = saidaVec[i].instrumento;
-            aux.nota = saidaVec[i].nota;
-            aux.intensidade = saidaVec[i].intensidade;
-            saidaVec[i].instrumento = saidaVec[j].instrumento;
-            saidaVec[i].nota = saidaVec[j].nota;
-            saidaVec[i].intensidade = saidaVec[j].intensidade;
-            saidaVec[j].instrumento = aux.instrumento;
-            saidaVec[j].nota = aux.nota;
-            saidaVec[j].intensidade = aux.intensidade;
+            aux.instrumento = vetorAuxiliar[i].instrumento;
+            aux.nota = vetorAuxiliar[i].nota;
+            aux.intensidade = vetorAuxiliar[i].intensidade;
+            aux.duracao = vetorAuxiliar[i].duracao;
+            vetorAuxiliar[i].instrumento = vetorAuxiliar[j].instrumento;
+            vetorAuxiliar[i].nota = vetorAuxiliar[j].nota;
+            vetorAuxiliar[i].intensidade = vetorAuxiliar[j].intensidade;
+            vetorAuxiliar[i].duracao = vetorAuxiliar[j].duracao;
+            vetorAuxiliar[j].instrumento = aux.instrumento;
+            vetorAuxiliar[j].nota = aux.nota;
+            vetorAuxiliar[j].intensidade = aux.intensidade;
+            vetorAuxiliar[j].duracao = aux.duracao;
             i=0;
             j=0;
           }
-          /*se neste instante a posicao menor possuir um mesmo instrumento com nota maior, troca*/
-          else if(saidaVec[i].instrumento == saidaVec[j].instrumento && saidaVec[i].nota > saidaVec[j].nota)
+          /*se neste instanteInicial a posicao menor possuir um mesmo instrumento com nota maior, troca*/
+          else if(vetorAuxiliar[i].instrumento == vetorAuxiliar[j].instrumento && vetorAuxiliar[i].nota > vetorAuxiliar[j].nota)
           {
-            aux.instrumento = saidaVec[i].instrumento;
-            aux.nota = saidaVec[i].nota;
-            aux.intensidade = saidaVec[i].intensidade;
-            saidaVec[i].instrumento = saidaVec[j].instrumento;
-            saidaVec[i].nota = saidaVec[j].nota;
-            saidaVec[i].intensidade = saidaVec[j].intensidade;
-            saidaVec[j].instrumento = aux.instrumento;
-            saidaVec[j].nota = aux.nota;
-            saidaVec[j].intensidade = aux.intensidade;
+            aux.instrumento = vetorAuxiliar[i].instrumento;
+            aux.nota = vetorAuxiliar[i].nota;
+            aux.intensidade = vetorAuxiliar[i].intensidade;
+            aux.duracao = vetorAuxiliar[i].duracao;
+            vetorAuxiliar[i].instrumento = vetorAuxiliar[j].instrumento;
+            vetorAuxiliar[i].nota = vetorAuxiliar[j].nota;
+            vetorAuxiliar[i].intensidade = vetorAuxiliar[j].intensidade;
+            vetorAuxiliar[i].duracao = vetorAuxiliar[j].duracao;
+            vetorAuxiliar[j].instrumento = aux.instrumento;
+            vetorAuxiliar[j].nota = aux.nota;
+            vetorAuxiliar[j].intensidade = aux.intensidade;
+            vetorAuxiliar[j].duracao = aux.duracao;
             i=0;
             j=0;
+          }
+          else if(vetorAuxiliar[i].instrumento == vetorAuxiliar[j].instrumento && vetorAuxiliar[i].nota == vetorAuxiliar[j].nota && vetorAuxiliar[i].intensidade > vetorAuxiliar[j].intensidade)
+          {
+            aux.instrumento = vetorAuxiliar[i].instrumento;
+            aux.nota = vetorAuxiliar[i].nota;
+            aux.intensidade = vetorAuxiliar[i].intensidade;
+            aux.duracao = vetorAuxiliar[i].duracao;
+            vetorAuxiliar[i].instrumento = vetorAuxiliar[j].instrumento;
+            vetorAuxiliar[i].nota = vetorAuxiliar[j].nota;
+            vetorAuxiliar[i].intensidade = vetorAuxiliar[j].intensidade;
+            vetorAuxiliar[i].duracao = vetorAuxiliar[j].duracao;
+            vetorAuxiliar[j].instrumento = aux.instrumento;
+            vetorAuxiliar[j].nota = aux.nota;
+            vetorAuxiliar[j].intensidade = aux.intensidade;
+            vetorAuxiliar[j].duracao = aux.duracao;
+          }
+          else if(vetorAuxiliar[i].instrumento == vetorAuxiliar[j].instrumento && vetorAuxiliar[i].nota == vetorAuxiliar[j].nota && vetorAuxiliar[i].duracao > vetorAuxiliar[j].duracao)
+          {
+            aux.instrumento = vetorAuxiliar[i].instrumento;
+            aux.nota = vetorAuxiliar[i].nota;
+            aux.intensidade = vetorAuxiliar[i].intensidade;
+            aux.duracao = vetorAuxiliar[i].duracao;
+            vetorAuxiliar[i].instrumento = vetorAuxiliar[j].instrumento;
+            vetorAuxiliar[i].nota = vetorAuxiliar[j].nota;
+            vetorAuxiliar[i].intensidade = vetorAuxiliar[j].intensidade;
+            vetorAuxiliar[i].duracao = vetorAuxiliar[j].duracao;
+            vetorAuxiliar[j].instrumento = aux.instrumento;
+            vetorAuxiliar[j].nota = aux.nota;
+            vetorAuxiliar[j].intensidade = aux.intensidade;
+            vetorAuxiliar[j].duracao = aux.duracao;
           }
       }
     }
   }
+  /*copia para o vetor de saida*/
+  for(i=0;i<sizeEventos*2;i++)
+  {
+    saidaVec[i].instrumento=vetorAuxiliar[i].instrumento;
+    saidaVec[i].nota=vetorAuxiliar[i].nota;
+    saidaVec[i].intensidade=vetorAuxiliar[i].intensidade;
+    saidaVec[i].instante=vetorAuxiliar[i].instanteInicial;
+  }
   /*chamamos a funcao de saidaVec*/
   saida(0, sizeEventos*2, saidaVec);
-  /*libera a memoria do vetor de saidaVec*/
+  /*libera a memoria do vetor de vetorAuxiliar e saidaVec*/
+  free(vetorAuxiliar);
   free(saidaVec);
   /*termina o programa*/
   return 0;
