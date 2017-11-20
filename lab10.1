@@ -68,9 +68,11 @@ int main()
   TpEvento *eventos;
   /*variaveis auxiliares*/
   int i,j,tamanho,contaZero;
+  int valido;
   /*realiza a leitura dos instrumentos e eventos*/
   int leitura[5];
 
+  valido =0;
   i=0;
   /*realiza as leituras ate o fim do programa*/
   while (contaZero!=5)
@@ -81,6 +83,9 @@ int main()
       scanf("%d", &leitura[i]);
       if(leitura[i]==0)
         contaZero++;
+      /*caso a leitura nao for valida*/
+      if(leitura[i]<0 || (i<3 && leitura[i]>128))
+        valido=-1;
     }
     /*contaZero!=5 a leitura nao foi 5 zeros, nao eh o fim do programa" */
     i=0;
@@ -97,60 +102,66 @@ int main()
     }
 
   }
-  /*o tamanho do vetor de eventos eh 2 vezes o vetor de entrada, pois cada entrada gera 2 eventos
-   um de inicio e outro de fim*/
-  eventos = malloc(sizeof(TpEvento)*tamanho*2);
-  /*preenchemos entao o vetor de eventos*/
-  for(i=0;i<tamanho;i++)
+  /*caso a leitura seja valida continua o programa*/
+  if(valido!=-1)
   {
-    eventos[i].instrumento = entrada[i].instrumento;
-    eventos[i].nota = entrada[i].nota;
-    eventos[i].intensidade = entrada[i].intensidade;
-    eventos[i].instante = entrada[i].instanteInicial;
-    eventos[i+tamanho].instrumento = entrada[i].instrumento;
-    eventos[i+tamanho].nota = entrada[i].nota;
-    eventos[i+tamanho].intensidade = 0;
-    eventos[i+tamanho].instante= entrada[i].duracao+entrada[i].instanteInicial;
-  }
-  /*realiza a ordenacao do vetor de entrada com base nas especificacoes dadas do exercicio
-  Sao ordenados por ordem de importancia : Instante > Instrumento menor > Nota Menor > intensidade.*/
-  /*ordena o vetor usando instante como parametro do insertionSort*/
-  insertionSort(eventos,tamanho*2);
-  for(i=0;i<tamanho*2;i++)
-  {
-    for(j=i+1;j<tamanho*2;j++)
+    /*o tamanho do vetor de eventos eh 2 vezes o vetor de entrada, pois cada entrada gera 2 eventos
+    um de inicio e outro de fim*/
+    eventos = malloc(sizeof(TpEvento)*tamanho*2);
+    /*preenchemos entao o vetor de eventos*/
+    for(i=0;i<tamanho;i++)
     {
-
-      /*um instante que possui 2 eventos*/
-      if(eventos[i].instante == eventos[j].instante)
+      eventos[i].instrumento = entrada[i].instrumento;
+      eventos[i].nota = entrada[i].nota;
+      eventos[i].intensidade = entrada[i].intensidade;
+      eventos[i].instante = entrada[i].instanteInicial;
+      eventos[i+tamanho].instrumento = entrada[i].instrumento;
+      eventos[i+tamanho].nota = entrada[i].nota;
+      eventos[i+tamanho].intensidade = 0;
+      eventos[i+tamanho].instante= entrada[i].duracao+entrada[i].instanteInicial;
+    }
+    /*realiza a ordenacao do vetor de entrada com base nas especificacoes dadas do exercicio
+    Sao ordenados por ordem de importancia : Instante > Instrumento menor > Nota Menor > intensidade.*/
+    /*ordena o vetor usando instante como parametro do insertionSort*/
+    insertionSort(eventos,tamanho*2);
+    for(i=0;i<tamanho*2;i++)
+    {
+      for(j=i+1;j<tamanho*2;j++)
       {
-        /*se neste instante a posicao menor possuir um instrumento maior, troca*/
-        if(eventos[i].instrumento > eventos[j].instrumento)
+
+        /*um instante que possui 2 eventos*/
+        if(eventos[i].instante == eventos[j].instante)
         {
-          trocaElementos(eventos,i,j);
-          i=0;
-          j=0;
-        }
-        /*se neste instante a posicao menor possuir um mesmo instrumento com nota maior, troca*/
-        else if(eventos[i].instrumento == eventos[j].instrumento && eventos[i].nota > eventos[j].nota)
-        {
-          trocaElementos(eventos,i,j);
-          i=0;
-          j=0;
-        }
-        /*um instante com intensidade maior troca*/
-        else if(eventos[i].instrumento == eventos[j].instrumento && eventos[i].nota == eventos[j].nota && eventos[i].intensidade > eventos[j].intensidade)
-        {
-          trocaElementos(eventos,i,j);
-          i=0;
-          j=0;
+          /*se neste instante a posicao menor possuir um instrumento maior, troca*/
+          if(eventos[i].instrumento > eventos[j].instrumento)
+          {
+            trocaElementos(eventos,i,j);
+            i=0;
+            j=0;
+          }
+          /*se neste instante a posicao menor possuir um mesmo instrumento com nota maior, troca*/
+          else if(eventos[i].instrumento == eventos[j].instrumento && eventos[i].nota > eventos[j].nota)
+          {
+            trocaElementos(eventos,i,j);
+            i=0;
+            j=0;
+          }
+          /*um instante com intensidade maior troca*/
+          else if(eventos[i].instrumento == eventos[j].instrumento && eventos[i].nota == eventos[j].nota && eventos[i].intensidade > eventos[j].intensidade)
+          {
+            trocaElementos(eventos,i,j);
+            i=0;
+            j=0;
+          }
         }
       }
     }
+    /*chamamos a funcao de eventos*/
+    saida(0, tamanho*2, eventos);
   }
-
-  /*chamamos a funcao de eventos*/
-  saida(0, tamanho*2, eventos);
+  /*leitura invalida*/
+  else
+    saida(0,0,eventos);
   /*libera a memoria*/
   free(entrada);
   free(eventos);
