@@ -161,8 +161,12 @@ int main()
     saida(0, tamanho*2, eventos);
   }
   /*leitura invalida*/
-  else
+  if(valido!=0)
+  {
+    eventos= (TpSom *) realloc(eventos,0);
     saida(0,0,eventos);
+  }
+      
   /*libera a memoria*/
   free(entrada);
   free(eventos);
