@@ -103,8 +103,7 @@ int main()
 
   }
   /*caso a leitura seja valida continua o programa*/
-  if(valido!=-1)
-  {
+
     /*o tamanho do vetor de eventos eh 2 vezes o vetor de entrada, pois cada entrada gera 2 eventos
     um de inicio e outro de fim*/
     eventos = malloc(sizeof(TpEvento)*tamanho*2);
@@ -120,6 +119,8 @@ int main()
       eventos[i+tamanho].intensidade = 0;
       eventos[i+tamanho].instante= entrada[i].duracao+entrada[i].instanteInicial;
     }
+  if(valido!=-1)
+  {
     /*realiza a ordenacao do vetor de entrada com base nas especificacoes dadas do exercicio
     Sao ordenados por ordem de importancia : Instante > Instrumento menor > Nota Menor > intensidade.*/
     /*ordena o vetor usando instante como parametro do insertionSort*/
